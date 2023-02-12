@@ -31,15 +31,10 @@ def train():
         """POST request receives a *.csv file. trains the TF-IDF models and pkl them"""
         # check if the post request has the file part
         if 'file' not in request.files:
-            print(1111)
             return Response("No file uploaded", status=400)
-        else:
-            print('ELSE')
-        print('ggegege')
         file = request.files['file']
         if file and allowed_file(file.filename):
                 filename = file.filename
-                print(000)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(path)
         train_tfidf_from_csv(data_path=path)

@@ -34,7 +34,6 @@ class DataFrameHandler():
 
 def similarity_score(rows):
     rows = pd.DataFrame(rows)
-    print(2)
     rows = run_preprocess(rows)
     isimler = rows["Ad-Soyad"].values
     # train and store TF-IDF
@@ -50,7 +49,7 @@ def similarity_score(rows):
     #print("Inferring using TF-IDF text model")
     rows['models_names'] = list(zip(rows['İl'], rows["İlçe"], rows["Mahalle"]))
     rows["text"] = rows['Bina Adı'] + " " + rows['Dış Kapı/ Blok/Apartman No'] + " " + rows[
-            "Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + rows["Adres"]
+            "Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + rows["new_adres"]
 
     text_similarities = []
     for index, row in rows.iterrows():
@@ -106,13 +105,13 @@ def train_tfidf_from_csv(data_path="data/merged_v1.csv"):
     dff1 = dff  # [(dff["oran_isim"] >0.90) ] #& (dfff["benzer_id_isim"] != dfff["id"])
     dff1 = dff1.fillna("")
     dff1["text"] = dff1['Bina Adı'] + " " + dff1['Dış Kapı/ Blok/Apartman No'] \
-                   + " " + dff1["Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + dff1["Adres"]
+                   + " " + dff1["Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + dff1["new_adres"]
     text_tfidf_models = dict()
     for i in dff1.groupby(['İl', 'İlçe', 'Mahalle']):
         dff_i = i[1]
 
         dff_i["text"] = dff_i['Bina Adı'] + " " + dff_i['Dış Kapı/ Blok/Apartman No'] + " " + dff_i[
-            "Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + dff_i["Adres"]  # + " " + dff_i["Ad-Soyad"]
+            "Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + dff_i["new_adress"]  # + " " + dff_i["Ad-Soyad"]
         dff_i["text"] = dff_i["text"].replace(replacement)
         dff_i["text"] = dff_i["text"].apply(text_edit)
         text = dff_i["text"]

@@ -221,7 +221,7 @@ def il_ilce_mah_corrector(df):
     df['Mahalle'] = df['Mahalle'].str.replace('MAHALLESİ', '')
 
     # read correct csv file to check to correct the data
-    df_correct = pd.read_csv('data/Mahalle_Koy_joined.csv',header=0, on_bad_lines='skip')
+    df_correct = pd.read_csv('reference_data/Mahalle_Koy_joined.csv',header=0, on_bad_lines='skip')
     for i in range(0, len(df_correct['ILCE'])):
         if 'MERKEZİ' in df_correct['ILCE'][i]:
             df_correct.at[i, 'ILCE'] = 'MERKEZ'
