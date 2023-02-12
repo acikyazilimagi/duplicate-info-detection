@@ -1,0 +1,96 @@
+replacement_sokak = {
+    'sk':'sokak',
+    'sok':'sokak',
+    'sokağı':'sokak',
+    'sokak:':'sokak',
+    'sokak :':'sokak',
+    'sokak : ':'sokak',
+    'sokak: ':'sokak',
+    'sk.':'sokak',
+    'sk.:':'sokak',
+    'sk. :':'sokak',
+    'sk. : ':'sokak',
+    'sk.: ':'sokak',
+    'sok.':'sokak',
+    'sok.:':'sokak',
+    'sok. :':'sokak',
+    'sok. : ':'sokak',
+    'sok.: ':'sokak',
+    'sok.:':'sokak'
+    }
+
+replacement_cadde = {
+    'cadde:':'cadde',
+    'cadde :':'cadde',
+    'cadde : ':'cadde',
+    'cadde: ':'cadde',
+    'cd':'cadde',
+    'cd.':'cadde',
+    'cd.:':'cadde',
+    'cd. :':'cadde',
+    'cd. : ':'cadde',
+    'cd.: ':'cadde',
+    'cad':'cadde',
+    'cad.':'cadde',
+    'cad.:':'cadde',
+    'cad. :':'cadde',
+    'cad. : ':'cadde',
+    'cad.: ':'cadde',
+    'Cad.': 'cadde'
+}
+
+replacement_apartman = {
+    'apartmani': 'apartman',
+    'apartmanı': 'apartman',
+    'apt.': 'apartman',
+    'apt': 'apartman'
+}
+
+replacement_mahalle= {
+    'mahalle:':'mahalle',
+    'mahalle :':'mahalle',
+    'mahalle : ':'mahalle',
+    'mahalle: ':'mahalle',
+    'mh':'mahalle',
+    'mh.':'mahalle',
+    'mh.:':'mahalle',
+    'mh. :':'mahalle',
+    'mh. : ':'mahalle',
+    'mh.: ':'mahalle',
+    'mah':'mahalle',
+    'mah.':'mahalle',
+    'mah.:':'mahalle',
+    'mah. :':'mahalle',
+    'mah. : ':'mahalle',
+    'mah.: ':'mahalle',
+    'mahallesi':'mahalle',
+    'mahallesi:':'mahalle',
+    'mahallesi :':'mahalle',
+    'mahallesi : ':'mahalle',
+    'mahallesi: ':'mahalle',
+    'mhl':'mahalle',
+    'mhl.':'mahalle',
+    'mhl.:':'mahalle',
+    'mhl. :':'mahalle',
+    'mhl. : ':'mahalle',
+    'mhl.: ':'mahalle',
+    'mahll':'mahalle',
+    'mahll.':'mahalle',
+    'mahll.:':'mahalle',
+    'mahll. :':'mahalle',
+    'mahll. : ':'mahalle',
+    'mahll.: ':
+    'mahalle'
+    }
+replacement = {
+        'sk': 'sokak',
+        'sok': 'sokak',
+        'sokağı': 'sokak',
+        'apartmani': 'apartman',
+        'apartmanı': 'apartman',
+        'apt.': 'apartman',
+        'apt': 'apartman',
+        'caddesi': 'cadde',
+        'cad.': 'cadde',
+        'cad': 'cadde',
+    }
