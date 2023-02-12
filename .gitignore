@@ -61,10 +61,6 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
-
 # Scrapy stuff:
 .scrapy
 
@@ -127,4 +123,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Possible data location while experimenting. 
 /data
+
+# Leftovers
+.DS_Store/
+.ds_store
+.vscode
+.idea
