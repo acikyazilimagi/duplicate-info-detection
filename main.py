@@ -1,9 +1,9 @@
 import aiofiles
-from tempfile import NamedTemporaryFile
 from similarity import train_tfidf_from_csv, similarity_score
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, Depends
 from config import settings
 from api.v1.models import Address
+from auth import authorize_trainer, authorize_checker
 
 app = FastAPI()
 
@@ -17,7 +17,7 @@ def is_file_allowed(filename):
 
 
 @app.post('/check_duplication/')
-def check_duplication(item: Address):
+def check_duplication(item: Address, token: str = Depends(authorize_checker)):
     """
     Check if the address is duplicated or not.
     Returns similarity value and a boolean to indicate
@@ -29,7 +29,7 @@ def check_duplication(item: Address):
 
 
 @app.post('/training/')
-async def train_tfidf(file: UploadFile = File(...)):
+async def train_tfidf(file: UploadFile = File(...), token: str = Depends(authorize_trainer)):
     """
     Receives a *.csv file. trains the TF-IDF models and pkl them
     """
@@ -44,12 +44,12 @@ async def train_tfidf(file: UploadFile = File(...)):
     return {'message': f"File '{file.filename}' processed"}
 
 
-@ app.post('/training/')
+@app.get('/training/')
 def check_training_status():
     pass
 
 
-@ app.get('health-check')
+@app.get('health-check')
 def health_check():
     return {'message': 'Healthy'}
 
