@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /data
+
+# vscode
+.vscode/
+
+# MacOS files
+.DS_Store
