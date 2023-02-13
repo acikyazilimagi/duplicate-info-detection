@@ -6,7 +6,7 @@ class Config(BaseSettings):
     query_api_key: str = "very-secret-other-api-key"
     duplicate_threshold: int = 80
     upload_folder: str = 'data'
-    allowed_extensions: dict = {'csv'}
+    allowed_extensions: list = ['csv']
 
 
 settings = Config()
