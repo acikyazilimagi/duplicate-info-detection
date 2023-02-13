@@ -1,7 +1,7 @@
 import aiofiles
 from tempfile import NamedTemporaryFile
 from similarity import train_tfidf_from_csv, similarity_score
-from fastapi import FastAPI, UploadFile, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks
 from config import settings
 from api.v1.models import Address
 
@@ -29,7 +29,7 @@ def check_duplication(item: Address):
 
 
 @app.post('/training/')
-async def train_tfidf(file: UploadFile):
+async def train_tfidf(file: UploadFile = File(...)):
     """
     Receives a *.csv file. trains the TF-IDF models and pkl them
     """
@@ -37,13 +37,11 @@ async def train_tfidf(file: UploadFile):
         contents = await file.read()
         async with aiofiles.open(f"{UPLOAD_FOLDER}/{file.filename}", 'wb') as f:
             await f.write(contents)
-    except Exception:
-        return {"message": "There was an error uploading the file"}
     finally:
         await file.close()
 
     train_tfidf_from_csv(data_path=f"{UPLOAD_FOLDER}/{file.filename}")
-    return {'message': f"File '{file.filename}' accepted"}
+    return {'message': f"File '{file.filename}' processed"}
 
 
 @ app.post('/training/')
