@@ -1,42 +1,59 @@
-import json
-import os
+import aiofiles
+from tempfile import NamedTemporaryFile
 from similarity import train_tfidf_from_csv, similarity_score
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, BackgroundTasks
+from config import settings
 from api.v1.models import Address
 
 app = FastAPI()
 
-UPLOAD_FOLDER = 'data'
-ALLOWED_EXTENSIONS = {'csv'}
+UPLOAD_FOLDER = settings.upload_folder
+ALLOWED_EXTENSIONS = settings.allowed_extensions
 
 
-def allowed_file(filename):
+def is_file_allowed(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.post('/check_duplication/')
 def check_duplication(item: Address):
+    """
+    Check if the address is duplicated or not.
+    Returns similarity value and a boolean to indicate
+    whether the score is above threshold or not.
+    *True* means address is duplicated.
+    """
     address = item.dict(by_alias=True)
-    return json.dumps(similarity_score([address]))
+    return similarity_score([address])
 
 
-@app.route('/train_tfidf/', methods=['POST'])
-def train():
-    if request.method == 'POST':
-        """POST request receives a *.csv file. trains the TF-IDF models and pkl them"""
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            return Response("No file uploaded", status=400)
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = file.filename
-            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(path)
-        train_tfidf_from_csv(data_path=path)
-        return Response("Models trained and saved to server")
-    # train_tfidf_from_csv()
-    # return Response("Models trained and saved to server")
+@app.post('/training/')
+async def train_tfidf(file: UploadFile):
+    """
+    Receives a *.csv file. trains the TF-IDF models and pkl them
+    """
+    try:
+        contents = await file.read()
+        async with aiofiles.open(f"{UPLOAD_FOLDER}/{file.filename}", 'wb') as f:
+            await f.write(contents)
+    except Exception:
+        return {"message": "There was an error uploading the file"}
+    finally:
+        await file.close()
+
+    train_tfidf_from_csv(data_path=f"{UPLOAD_FOLDER}/{file.filename}")
+    return {'message': f"File '{file.filename}' accepted"}
+
+
+@ app.post('/training/')
+def check_training_status():
+    pass
+
+
+@ app.get('health-check')
+def health_check():
+    return {'message': 'Healthy'}
 
 
 if __name__ == '__main__':
