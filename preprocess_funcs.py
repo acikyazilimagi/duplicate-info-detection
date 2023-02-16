@@ -6,11 +6,14 @@ from collections import Counter
 import numpy as np
 import joblib
 import jellyfish
-from replacements import replacement_sokak,replacement_cadde,replacement_apartman,replacement_mahalle,replacement
+from replacements import replacement_sokak, replacement_cadde, replacement_apartman, replacement_mahalle, replacement, ifadeler, yer_yon_belirten
+
+
 def extract_integers_from_string(string):
     return [int(item) for item in re.findall(r'\b\d+\b', string)]
 
-def dis( s1: str, s2: str ) -> str:
+
+def dis(s1: str, s2: str) -> str:
     '''
     Does: 
     '''
@@ -39,6 +42,7 @@ def dis( s1: str, s2: str ) -> str:
 
     return cost
 
+
 def levenshteinDistance(str1, str2):
     m = len(str1)
     n = len(str2)
@@ -55,18 +59,19 @@ def levenshteinDistance(str1, str2):
                                d[i - 1][j - 1] + substitutionCost))
     return d[-1][-1]
 
-def getLower( input: str ) -> str:
-	input= str(input)
-	#: Map
-	d = {
-	"Ş":"ş", "I":"ı", "Ü":"ü", "Ç":"ç", "Ö":"ö", "Ğ":"ğ", 
-	"İ":"i", "Â":"â", "Î":"î", "Û":"û"
-	}
-	#: Replace
-	input = reduce(lambda x, y: x.replace(y, d[y]), d, input)
-	input = input.lower()
-	#: Return
-	return input
+
+def getLower(input: str) -> str:
+    input = str(input)
+    #: Map
+    d = {
+        "Ş": "ş", "I": "ı", "Ü": "ü", "Ç": "ç", "Ö": "ö", "Ğ": "ğ",
+        "İ": "i", "Â": "â", "Î": "î", "Û": "û"
+    }
+    #: Replace
+    input = reduce(lambda x, y: x.replace(y, d[y]), d, input)
+    input = input.lower()
+    #: Return
+    return input
 
 
 def adres(row):
@@ -76,7 +81,7 @@ def adres(row):
     mah = getLower(row['Mahalle'])
     adres = getLower(row['Adres'])
     adres = " " + getLower(str(adres)) + " "
-    
+
     adres = adres.replace(" " + il + " ", " ")
     adres = adres.replace(" " + ilce + " ", " ")
     adres = adres.replace(" " + mah + " ", " ")
@@ -96,10 +101,12 @@ def adres(row):
 
     for r in replacement:
         adres = re.sub(r" +", " ", adres)
-        adres = " " + adres.replace(" " + r + " ", " " + replacement[r] + " ").strip() + " "
+        adres = " " + adres.replace(" " + r + " ",
+                                    " " + replacement[r] + " ").strip() + " "
 
     adres = re.sub(r" +", " ", adres)
     return adres.strip()
+
 
 def clean(value):
     '''
@@ -110,7 +117,8 @@ def clean(value):
 
     for r in replacement:
         value = re.sub(r" +", " ", value)
-        value = " " + value.replace(" " + r + " ", " " + replacement[r] + " ").strip() + " "
+        value = " " + value.replace(" " + r + " ",
+                                    " " + replacement[r] + " ").strip() + " "
 
     value = value.replace("ğ", "g")
     value = value.replace("ı", "i")
@@ -120,9 +128,10 @@ def clean(value):
     value = value.replace("ş", "s")
 
     for c in [',', ';', ':', '-', '.', '/']:
-        value = value.replace(c, " ") 
+        value = value.replace(c, " ")
     value = re.sub(r" +", " ", value).strip()
     return value
+
 
 def text_edit(x):
     value = x.lower()
@@ -136,8 +145,10 @@ def text_edit(x):
     # print(" ".join(list(dict.fromkeys(split))).strip())
     return " ".join(list(dict.fromkeys(split))).strip()
 
+
 def remove_block(text):
     return re.sub(r'\bblok\b', '', text, flags=re.IGNORECASE)
+
 
 def process_apart_no(row):
     '''
@@ -161,48 +172,53 @@ def process_apart_no(row):
     if "blok" and "no" in row_string:
         return row
     if "no" in row_string:
-        detected_no_list = [int(item) for item in re.findall(r'\b\d+\b', row_string)]
+        detected_no_list = [int(item)
+                            for item in re.findall(r'\b\d+\b', row_string)]
         if len(detected_no_list) == 1:
-            row["Dış Kapı/ Blok/Apartman No"] =  f'No: {detected_no_list[0]}'
+            row["Dış Kapı/ Blok/Apartman No"] = f'No: {detected_no_list[0]}'
             return row
         else:
             return row
     if "blok" in row_string:
         # Check if integer exists
-        detected_int_list = [int(item) for item in re.findall(r'\b\d+\b', row_string)]
+        detected_int_list = [int(item)
+                             for item in re.findall(r'\b\d+\b', row_string)]
         if len(detected_int_list) == 0:
             remaining_string = remove_block(row_string)
             if remaining_string != '':
-                row["Dış Kapı/ Blok/Apartman No"] =  f'Blok: {remaining_string}'
+                row["Dış Kapı/ Blok/Apartman No"] = f'{remaining_string} Blok'
                 return row
             else:
                 return row
         else:
             return row
-    if  str.isdigit(row_string) == True:
-        detected_int_list = [int(item) for item in re.findall(r'\b\d+\b', row_string)]
-        row["Dış Kapı/ Blok/Apartman No"] =  f'No: {detected_int_list[0]}'
+    if str.isdigit(row_string) == True:
+        detected_int_list = [int(item)
+                             for item in re.findall(r'\b\d+\b', row_string)]
+        row["Dış Kapı/ Blok/Apartman No"] = f'No: {detected_int_list[0]}'
         return row
     return row
 
 # prepares the word to be corrected
+
+
 def clean_words(word=str):
-    
+
     # lower case
     if 'I' in word:
-        word = word.replace('I','ı')
+        word = word.replace('I', 'ı')
         word = word.lower()
     else:
         word = word.lower()
     word = word.strip()
     # find \n and remove it
-    word = word.replace('\n','')
+    word = word.replace('\n', '')
     # delete comma
-    word = word.replace(',','')
+    word = word.replace(',', '')
     # delete dot
-    word = word.replace('.','')
+    word = word.replace('.', '')
     # delete slash
-    word = word.replace('/','')
+    word = word.replace('/', '')
 
     return word
 
@@ -221,7 +237,8 @@ def il_ilce_mah_corrector(df):
     df['Mahalle'] = df['Mahalle'].str.replace('MAHALLESİ', '')
 
     # read correct csv file to check to correct the data
-    df_correct = pd.read_csv('reference_data/Mahalle_Koy_joined.csv',header=0, on_bad_lines='skip')
+    df_correct = pd.read_csv(
+        'reference_data/Mahalle_Koy_joined.csv', header=0, on_bad_lines='skip')
     for i in range(0, len(df_correct['ILCE'])):
         if 'MERKEZİ' in df_correct['ILCE'][i]:
             df_correct.at[i, 'ILCE'] = 'MERKEZ'
@@ -233,33 +250,40 @@ def il_ilce_mah_corrector(df):
         if row['İl'] not in correct_il:
             il_score_list = []
             for il in correct_il:
-                score = jellyfish.jaro_winkler_similarity(clean_words(row['İl']), clean_words(il))
+                score = jellyfish.jaro_winkler_similarity(
+                    clean_words(row['İl']), clean_words(il))
                 il_score_list.append(score)
             if max(il_score_list) > 0.85:
                 il = correct_il[il_score_list.index(max(il_score_list))]
                 df.at[index, 'İl'] = il
 
-                ilce_list = df_correct[df_correct['IL'] == il]['ILCE'].unique().tolist()
+                ilce_list = df_correct[df_correct['IL']
+                                       == il]['ILCE'].unique().tolist()
                 if row['İlçe'] not in ilce_list:
                     ilce_score_list = []
                     for ilce in ilce_list:
-                        score = jellyfish.jaro_winkler_similarity(clean_words(row['İlçe']), clean_words(ilce))
+                        score = jellyfish.jaro_winkler_similarity(
+                            clean_words(row['İlçe']), clean_words(ilce))
                         ilce_score_list.append(score)
                     if max(ilce_score_list) > 0.85:
-                        ilce = ilce_list[ilce_score_list.index(max(ilce_score_list))]
+                        ilce = ilce_list[ilce_score_list.index(
+                            max(ilce_score_list))]
                         df.at[index, 'İlçe'] = ilce
 
-                        mahalle_list = df_correct[df_correct['IL'] == il][df_correct['ILCE'] == ilce]['MAHALLE'].unique().tolist()
+                        mahalle_list = df_correct[df_correct['IL'] ==
+                                                  il][df_correct['ILCE'] == ilce]['MAHALLE'].unique().tolist()
                         if row['Mahalle'] not in mahalle_list:
                             mahalle_score_list = []
                             for mahalle in mahalle_list:
                                 if 'MAHALLE' in mahalle:
                                     mahalle = mahalle.replace('MAHALLE', '')
-                                score = jellyfish.jaro_winkler_similarity(clean_words(row['Mahalle']), clean_words(mahalle))
+                                score = jellyfish.jaro_winkler_similarity(
+                                    clean_words(row['Mahalle']), clean_words(mahalle))
 
                                 mahalle_score_list.append(score)
                             if max(mahalle_score_list) > 0.85:
-                                mahalle = mahalle_list[mahalle_score_list.index(max(mahalle_score_list))]
+                                mahalle = mahalle_list[mahalle_score_list.index(
+                                    max(mahalle_score_list))]
                                 df.at[index, 'Mahalle'] = mahalle
     return df
 
@@ -271,28 +295,81 @@ def add_mah_str(row):
     row['Mahalle'] = row['Mahalle'] + ' Mahallesi'
     return row
 
-def replace_nan_with_0(row):
 
+def replace_nan_with_0(row):
     '''
     Replace NaN with 0
     '''
     if np.isnan(row['oran']) == True:
         row['oran'] = 0
     return row
+
+
+def detect_non_adress(row):
+    '''
+    If no adress strings exists, it updates row['new_adress'] as ""
+    '''
+    adres_string = row['new_adres']
+    if adres_string == "":
+        return row
+    # Counter is matched string list calculator lists, at the end of the for if its 0 then assign adress row as ""
+    counter = list()
+    for adres in yer_yon_belirten:
+        if adres.lower() in adres_string:
+            counter.append(adres)
+    if len(counter) == 0:
+        row['new_adres'] = ""
+        return row
+    else:
+        return row
+
+
+def replace_help_call_strings(row):
+    '''
+    Removes help strings if exists in row strings
+    '''
+    adres_string = row['new_adres']
+    if adres_string == "":
+        return row
+    for help_string in ifadeler:
+        if help_string.lower() in row['new_adres'].lower():
+            adres_string = adres_string.replace(help_string, "").strip()
+    row['new_adres'] = adres_string
+    return row
+
+
 def run_preprocess(dff: pd.Series):
     dff = il_ilce_mah_corrector(dff)
-    dff['Mahalle'] = dff['Mahalle'].apply(lambda value: str(value).replace('undefined_mahalle',""))
-    dff = dff.apply(lambda row: add_mah_str(row),axis=1)
+    dff['Mahalle'] = dff['Mahalle'].apply(
+        lambda value: str(value).replace('undefined_mahalle', ""))
+    dff = dff.apply(lambda row: add_mah_str(row), axis=1)
     dff = dff.fillna("")
     # Rule based prep
-    dff['Mahalle'] = dff['Mahalle'].apply(lambda value: str(value).replace(" Mahallesi", ""))
-    dff['Mahalle'] = dff['Mahalle'].apply(lambda value: str(value).replace(" MAHALLESI", ""))
-    dff['Mahalle'] = dff['Mahalle'].apply(lambda value: str(value).replace(" MAHALLESİ", ""))
+    dff['Mahalle'] = dff['Mahalle'].apply(
+        lambda value: str(value).replace(" Mahallesi", ""))
+    dff['Mahalle'] = dff['Mahalle'].apply(
+        lambda value: str(value).replace(" MAHALLESI", ""))
+    dff['Mahalle'] = dff['Mahalle'].apply(
+        lambda value: str(value).replace(" MAHALLESİ", ""))
     # Define rule base string ops
     # Clean specific columns
-    for c in ['İl','İlçe','Mahalle','Adres','Ad-Soyad']:
+    for c in ['İl', 'İlçe', 'Mahalle', 'Adres', 'Ad-Soyad']:
         dff[c] = dff[c].apply(lambda value: clean(value))
     # Call address adress func
-    dff['new_adres'] = dff.apply(lambda row: adres(row), axis = 1)
-    dff = dff.apply(lambda row:process_apart_no(row),axis=1)
+    dff['new_adres'] = dff.apply(lambda row: adres(row), axis=1)
+    dff = dff.apply(lambda row: replace_help_call_strings(row), axis=1)
+    dff = dff.apply(lambda row: detect_non_adress(row), axis=1)
+    dff['new_adres'] = dff['new_adres'].str.replace(
+        '\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', regex=True)  # url
+    dff['new_adres'] = dff['new_adres'].str.replace(
+        '[^\w\s#@/:%.,_-]', '', flags=re.UNICODE)  # emoji
+    dff['new_adres'] = dff['new_adres'].str.replace('\n', '')
+    dff['new_adres'] = dff['new_adres'].str.replace('\t', '')
+    dff['new_adres'] = dff['new_adres'].str.replace(
+        '@[A-Za-z0-9_]+', '', regex=True)  # tag
+    dff['new_adres'] = dff['new_adres'].str.replace(
+        '#[A-Za-z0-9_]+', '', regex=True)  # ha
+
+    dff = dff.apply(lambda row: process_apart_no(row), axis=1)
+
     return dff
