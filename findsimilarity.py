@@ -263,6 +263,22 @@ def il_ilce_mah_corrector(df):
                                 df.at[index, 'Mahalle'] = mahalle
     return df
 
+def find_adres_value(row):
+    '''
+    Finds the value of 'Adres' column 
+    '''
+    # if 'Adres' column is exist
+    if 'Adres' in row:
+        row = row['Adres']
+        valueble_words = ['il','ilçe','mahalle','sokak','cadde','bulvar','apartman','no']
+        score=0
+        for word in valueble_words:
+            if word in row:
+                score += 1
+        return score
+    else:
+        # return empty string
+        return 0
 
 def add_mah_str(row):
     '''
