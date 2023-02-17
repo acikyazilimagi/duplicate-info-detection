@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from config import settings
 from api.v1.schemas import Address, CsvResponse
 from auth import authorize_trainer, authorize_checker
-from .tasks import deduplicate_csv
+from tasks import deduplicate_csv as deduplicate_task
 from .db.database import SessionLocal
 from .db.crud import get_task, delete_task
 
@@ -71,7 +71,7 @@ async def deduplicate_csv(background_tasks: BackgroundTasks, file: UploadFile = 
     finally:
         await file.close()
 
-    background_tasks.add_task(deduplicate_csv)
+    background_tasks.add_task(deduplicate_task)
 
     return CsvResponse(
         task_id=f"{file.filename}",
