@@ -2,7 +2,7 @@ from similarity import process_csv
 from db.crud import update_task_status, create_task
 from db.database import get_db
 from fastapi import Depends
-from .api.v1.schemas import TaskStatus
+from api.v1.schemas import TaskStatus
 from sqlalchemy.orm import Session
 
 

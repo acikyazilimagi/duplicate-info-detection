@@ -6,8 +6,8 @@ from config import settings
 from api.v1.schemas import Address, CsvResponse
 from auth import authorize_trainer, authorize_checker
 from tasks import deduplicate_csv as deduplicate_task
-from .db.database import SessionLocal
-from .db.crud import get_task, delete_task
+from db.database import SessionLocal
+from db.crud import get_task, delete_task
 
 app = FastAPI()
 
