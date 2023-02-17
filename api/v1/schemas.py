@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import Any
 from pydantic import BaseModel, Field
+from enum import Enum
 
 
 class Address(BaseModel):
@@ -28,3 +30,27 @@ class Score(BaseModel):
     text_score: str
     name_score: str
     is_simiar: bool
+
+
+class TaskStatus (str, Enum):
+    STARTED = 'started'
+    PROCESSING = 'processing'
+    COMPLETED = 'completed'
+
+
+class CsvResponse (BaseModel):
+    task_id: str
+    status: TaskStatus
+    file_name: str
+
+
+# ORM
+class CsvTask (BaseModel):
+    id: str
+    filename: str
+    status: TaskStatus
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        orm_mode = True
