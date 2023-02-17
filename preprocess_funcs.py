@@ -344,6 +344,14 @@ def run_preprocess(dff: pd.Series):
         lambda value: str(value).replace('undefined_mahalle', ""))
     dff = dff.apply(lambda row: add_mah_str(row), axis=1)
     dff = dff.fillna("")
+    dff["Adres"] = dff["Adres"].str.lower()
+    dff['Adres'] = dff['Adres'].str.replace('\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '',regex=True) # remove url
+    dff['Adres'] = dff['Adres'].str.replace('@[A-Za-z0-9_]+', '',regex=True) # remove tag
+    dff['Adres'] = dff['Adres'].str.replace('#[A-Za-z0-9_]+', '',regex=True) # remove hashtag
+    dff['Adres'] = dff['Adres'].str.replace('[^\w\s#@/:%.,_-]', '', flags=re.UNICODE) #emoji
+    dff['Adres'] = dff['Adres'].str.replace('\n', '')
+    dff['Adres'] = dff['Adres'].str.replace('\t', '')
+    
     # Rule based prep
     dff['Mahalle'] = dff['Mahalle'].apply(
         lambda value: str(value).replace(" Mahallesi", ""))
@@ -359,16 +367,16 @@ def run_preprocess(dff: pd.Series):
     dff['new_adres'] = dff.apply(lambda row: adres(row), axis=1)
     dff = dff.apply(lambda row: replace_help_call_strings(row), axis=1)
     dff = dff.apply(lambda row: detect_non_adress(row), axis=1)
-    dff['new_adres'] = dff['new_adres'].str.replace(
-        '\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', regex=True)  # url
-    dff['new_adres'] = dff['new_adres'].str.replace(
-        '[^\w\s#@/:%.,_-]', '', flags=re.UNICODE)  # emoji
-    dff['new_adres'] = dff['new_adres'].str.replace('\n', '')
-    dff['new_adres'] = dff['new_adres'].str.replace('\t', '')
-    dff['new_adres'] = dff['new_adres'].str.replace(
-        '@[A-Za-z0-9_]+', '', regex=True)  # tag
-    dff['new_adres'] = dff['new_adres'].str.replace(
-        '#[A-Za-z0-9_]+', '', regex=True)  # ha
+    # dff['new_adres'] = dff['new_adres'].str.replace(
+    #     '\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', regex=True)  # url
+    # dff['new_adres'] = dff['new_adres'].str.replace(
+    #     '[^\w\s#@/:%.,_-]', '', flags=re.UNICODE)  # emoji
+    # dff['new_adres'] = dff['new_adres'].str.replace('\n', '')
+    # dff['new_adres'] = dff['new_adres'].str.replace('\t', '')
+    # dff['new_adres'] = dff['new_adres'].str.replace(
+    #     '@[A-Za-z0-9_]+', '', regex=True)  # tag
+    # dff['new_adres'] = dff['new_adres'].str.replace(
+    #     '#[A-Za-z0-9_]+', '', regex=True)  # ha
 
     dff = dff.apply(lambda row: process_apart_no(row), axis=1)
 
