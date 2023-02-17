@@ -1,6 +1,5 @@
-# needs-resolver-api
+# Duplicate Report Dedection
 
 #### Project Description
 This project aims to find the similarities between the data rows provided, and helps out the manual data verification team to delete the similar rows by pointing out the similarity percentages considering the `name` and `address` columns in the first place.
 
-test
