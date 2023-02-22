@@ -1,4 +1,4 @@
-# Duplicate Report Dedection
+# Duplicate Information Detection
 
 ## Project Description
 This project aims to detect the duplicates among the data rows provided which comprise of reported distress calls for disaster-victims, and helps out a human eye to pick out highly similar rows via classifying the rows by attributes of similarity and providing the similarity rates between rows considering the `name` and `address` information. 
