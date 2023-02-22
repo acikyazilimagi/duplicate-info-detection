@@ -7,11 +7,11 @@ At this point, the similarity analysis in this project mainly utilizes `term fre
 
 ### High-Level Process Flow (Tentative)
 
-![image](https://user-images.githubusercontent.com/29688260/220365355-a5636a15-e4b3-4ff9-ae3a-86c70b323a59.png)
+![image](/img/process_flow.png)
 
 ### High-Level Preprocess Flow (Tentative)
 
-![image](https://user-images.githubusercontent.com/29688260/220373156-877a2764-49ae-4132-9f15-b43c79a5053a.png)
+![image](/img/preprocess.png)
 
 
 
