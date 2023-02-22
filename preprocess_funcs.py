@@ -6,7 +6,8 @@ from collections import Counter
 import numpy as np
 import joblib
 import jellyfish
-from replacements import replacement_sokak, replacement_cadde, replacement_apartman, replacement_mahalle, replacement, ifadeler, yer_yon_belirten
+from replacements import replacement_sokak, replacement_cadde, replacement_apartman, replacement_mahalle, replacement_site 
+from expressions import ifadeler, yer_yon_belirten
 
 
 def extract_integers_from_string(string):
@@ -75,19 +76,22 @@ def getLower(input: str) -> str:
 
 
 def adres(row):
-    eliminate = ['mahallesi', 'mah.', 'mah']
+    
     il = getLower(row['İl'])
     ilce = getLower(row['İlçe'])
     mah = getLower(row['Mahalle'])
+    
     adres = getLower(row['Adres'])
     adres = " " + getLower(str(adres)) + " "
 
     adres = adres.replace(" " + il + " ", " ")
     adres = adres.replace(" " + ilce + " ", " ")
-    adres = adres.replace(" " + mah + " ", " ")
+    adres = adres.replace(" " + mahallesi + " ", " ")
+    adres = adres.replace(" " + mah. + " ", " ")
+    adres = adres.replace(" " + mah + " ", " "
     adres = re.sub(r"([^a-zA-Z0-9\s])", r" \1 ", adres)
     adres = re.sub(r" +", " ", adres)
-
+    
     adres = adres.replace(" ı ", "ı")
     adres = adres.replace(" ç ", "ç")
     adres = adres.replace(" ö ", "ö")
@@ -95,10 +99,9 @@ def adres(row):
     adres = adres.replace(" ğ ", "ğ")
     adres = adres.replace("apartman ı", "apartman")
     adres = adres.replace(" ğ", "ğ")
-
-    for r in eliminate:
-        adres = adres.replace(" " + r + " ", " ")
-
+    
+                                                 
+    # replacement handle edilecek
     for r in replacement:
         adres = re.sub(r" +", " ", adres)
         adres = " " + adres.replace(" " + r + " ",
@@ -110,7 +113,7 @@ def adres(row):
 
 def clean(value):
     '''
-    # 
+    #
     '''
     value = " " + str(value) + " "
     value = getLower(value)
@@ -337,7 +340,16 @@ def replace_help_call_strings(row):
     row['new_adres'] = adres_string
     return row
 
-
+def do_replacements(rows):
+    
+    rows["text"] = rows["text"].replace(replacement_site)
+    rows["text"] = rows["text"].replace(replacement_apartman)
+    rows["text"] = rows["text"].replace(replacement_cadde)
+    rows["text"] = rows["text"].replace(replacement_mahalle)
+    rows["text"] = rows["text"].replace(replacement_sokak)
+    rows["text"] = rows["text"].apply(text_edit)
+    return rows
+    
 def run_preprocess(dff: pd.Series):
     dff = il_ilce_mah_corrector(dff)
     dff['Mahalle'] = dff['Mahalle'].apply(
@@ -359,25 +371,16 @@ def run_preprocess(dff: pd.Series):
         lambda value: str(value).replace(" MAHALLESI", ""))
     dff['Mahalle'] = dff['Mahalle'].apply(
         lambda value: str(value).replace(" MAHALLESİ", ""))
+   
     # Define rule base string ops
     # Clean specific columns
     for c in ['İl', 'İlçe', 'Mahalle', 'Adres', 'Ad-Soyad']:
         dff[c] = dff[c].apply(lambda value: clean(value))
+        
     # Call address adress func
     dff['new_adres'] = dff.apply(lambda row: adres(row), axis=1)
     dff = dff.apply(lambda row: replace_help_call_strings(row), axis=1)
     dff = dff.apply(lambda row: detect_non_adress(row), axis=1)
-    # dff['new_adres'] = dff['new_adres'].str.replace(
-    #     '\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', regex=True)  # url
-    # dff['new_adres'] = dff['new_adres'].str.replace(
-    #     '[^\w\s#@/:%.,_-]', '', flags=re.UNICODE)  # emoji
-    # dff['new_adres'] = dff['new_adres'].str.replace('\n', '')
-    # dff['new_adres'] = dff['new_adres'].str.replace('\t', '')
-    # dff['new_adres'] = dff['new_adres'].str.replace(
-    #     '@[A-Za-z0-9_]+', '', regex=True)  # tag
-    # dff['new_adres'] = dff['new_adres'].str.replace(
-    #     '#[A-Za-z0-9_]+', '', regex=True)  # ha
-
     dff = dff.apply(lambda row: process_apart_no(row), axis=1)
 
     return dff
