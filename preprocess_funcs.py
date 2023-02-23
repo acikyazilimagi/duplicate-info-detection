@@ -74,6 +74,18 @@ def getLower(input: str) -> str:
     #: Return
     return input
 
+replacement = {
+        'sk': 'sokak',
+        'sok': 'sokak',
+        'sokağı': 'sokak',
+        'apartmani': 'apartman',
+        'apartmanı': 'apartman',
+        'apt.': 'apartman',
+        'apt': 'apartman',
+        'caddesi': 'cadde',
+        'cad.': 'cadde',
+        'cad': 'cadde',
+    }
 
 def adres(row):
     
@@ -86,9 +98,9 @@ def adres(row):
 
     adres = adres.replace(" " + il + " ", " ")
     adres = adres.replace(" " + ilce + " ", " ")
-    adres = adres.replace(" " + mahallesi + " ", " ")
-    adres = adres.replace(" " + mah. + " ", " ")
-    adres = adres.replace(" " + mah + " ", " "
+    adres = adres.replace(" " + "mahallesi" + " ", " ")
+    adres = adres.replace(" " + "mah." + " ", " ")
+    adres = adres.replace(" " + "mah" + " ", " ")
     adres = re.sub(r"([^a-zA-Z0-9\s])", r" \1 ", adres)
     adres = re.sub(r" +", " ", adres)
     
@@ -350,37 +362,39 @@ def do_replacements(rows):
     rows["text"] = rows["text"].apply(text_edit)
     return rows
     
-def run_preprocess(dff: pd.Series):
-    dff = il_ilce_mah_corrector(dff)
-    dff['Mahalle'] = dff['Mahalle'].apply(
+def run_preprocess(df: pd.DataFrame):
+    df = il_ilce_mah_corrector(df)
+    df['Mahalle'] = df['Mahalle'].apply(
         lambda value: str(value).replace('undefined_mahalle', ""))
-    dff = dff.apply(lambda row: add_mah_str(row), axis=1)
-    dff = dff.fillna("")
-    dff["Adres"] = dff["Adres"].str.lower()
-    dff['Adres'] = dff['Adres'].str.replace('\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '',regex=True) # remove url
-    dff['Adres'] = dff['Adres'].str.replace('@[A-Za-z0-9_]+', '',regex=True) # remove tag
-    dff['Adres'] = dff['Adres'].str.replace('#[A-Za-z0-9_]+', '',regex=True) # remove hashtag
-    dff['Adres'] = dff['Adres'].str.replace('[^\w\s#@/:%.,_-]', '', flags=re.UNICODE) #emoji
-    dff['Adres'] = dff['Adres'].str.replace('\n', '')
-    dff['Adres'] = dff['Adres'].str.replace('\t', '')
+    df = df.apply(lambda row: add_mah_str(row), axis=1)
+    df = df.fillna("")
+    df["group"] = df["İl"] +"_" +df["İlçe"] +"_" +df["Mahalle"] +"_" +df["Bina Adı"] +"_" +df["Bulvar/Cadde/Sokak/Yol/Yanyol"] +"_" +df["Ad-Soyad"] +"_" +df["İç Kapı"]+"_" +df["Adres"]+"_" +df["Telefon"]+"_" +df["Dış Kapı/ Blok/Apartman No"]
+    df = df.drop_duplicates(["group"])
+    df["Adres"] = df["Adres"].str.lower()
+    df['Adres'] = df['Adres'].str.replace('\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '',regex=True) # remove url
+    df['Adres'] = df['Adres'].str.replace('@[A-Za-z0-9_]+', '',regex=True) # remove tag
+    df['Adres'] = df['Adres'].str.replace('#[A-Za-z0-9_]+', '',regex=True) # remove hashtag
+    df['Adres'] = df['Adres'].str.replace('[^\w\s#@/:%.,_-]', '', flags=re.UNICODE) #emoji
+    df['Adres'] = df['Adres'].str.replace('\n', '')
+    df['Adres'] = df['Adres'].str.replace('\t', '')
     
     # Rule based prep
-    dff['Mahalle'] = dff['Mahalle'].apply(
+    df['Mahalle'] = df['Mahalle'].apply(
         lambda value: str(value).replace(" Mahallesi", ""))
-    dff['Mahalle'] = dff['Mahalle'].apply(
+    df['Mahalle'] = df['Mahalle'].apply(
         lambda value: str(value).replace(" MAHALLESI", ""))
-    dff['Mahalle'] = dff['Mahalle'].apply(
+    df['Mahalle'] = df['Mahalle'].apply(
         lambda value: str(value).replace(" MAHALLESİ", ""))
    
     # Define rule base string ops
     # Clean specific columns
     for c in ['İl', 'İlçe', 'Mahalle', 'Adres', 'Ad-Soyad']:
-        dff[c] = dff[c].apply(lambda value: clean(value))
+        df[c] = df[c].apply(lambda value: clean(value))
         
     # Call address adress func
-    dff['new_adres'] = dff.apply(lambda row: adres(row), axis=1)
-    dff = dff.apply(lambda row: replace_help_call_strings(row), axis=1)
-    dff = dff.apply(lambda row: detect_non_adress(row), axis=1)
-    dff = dff.apply(lambda row: process_apart_no(row), axis=1)
+    df['new_adres'] = df.apply(lambda row: adres(row), axis=1)
+    df = df.apply(lambda row: replace_help_call_strings(row), axis=1)
+    df = df.apply(lambda row: detect_non_adress(row), axis=1)
+    df = df.apply(lambda row: process_apart_no(row), axis=1)
 
-    return dff
+    return df
