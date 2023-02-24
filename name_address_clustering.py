@@ -18,14 +18,10 @@ def load_data(data_path: str, preprocess_save_path: str = "data/df_preprocessed.
 
 def merge_address_columns(
         df: pd.DataFrame,
-        columns_to_merge: list = 
-            ["Bina Adı", 
-             "Dış Kapı/ Blok/Apartman No", 
-             "Bulvar/Cadde/Sokak/Yol/Yanyol", 
-             "new_adres"],
         new_column_name: str = "merged_address"
     ) -> pd.DataFrame:
-    df[new_column_name] = " ".join(df[column] for column in columns_to_merge)
+    df[new_column_name] = df['Bina Adı'] + " " + df['Dış Kapı/ Blok/Apartman No'] \
+        + " " + df["Bulvar/Cadde/Sokak/Yol/Yanyol"] + " " + df["new_adres"]
     return df
 
 def cluster_by_column(
@@ -83,7 +79,7 @@ def cluster_data(
                 # in case of any errors when clustering addresses, assign -1 to every row (means no cluster)
                 group_df.loc[cluster_df_mask, 'merged_address-cluster'] = -1
         return group_df
-    return df.groupby(["İl", "İlçe", "Mahalle"]).apply(cluster_group)
+    return df.groupby(["İl", "İlçe", "Mahalle"], group_keys=False).apply(cluster_group)
 
 def main(
         data_path: str = "data/merged_v1_4.csv",
