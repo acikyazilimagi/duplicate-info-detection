@@ -352,14 +352,13 @@ def replace_help_call_strings(row):
     row['new_adres'] = adres_string
     return row
 
-def do_replacements(rows):
-    
-    rows["text"] = rows["text"].replace(replacement_site)
-    rows["text"] = rows["text"].replace(replacement_apartman)
-    rows["text"] = rows["text"].replace(replacement_cadde)
-    rows["text"] = rows["text"].replace(replacement_mahalle)
-    rows["text"] = rows["text"].replace(replacement_sokak)
-    rows["text"] = rows["text"].apply(text_edit)
+def do_replacements(rows, col="text"):
+    rows[col] = rows[col].replace(replacement_site)
+    rows[col] = rows[col].replace(replacement_apartman)
+    rows[col] = rows[col].replace(replacement_cadde)
+    rows[col] = rows[col].replace(replacement_mahalle)
+    rows[col] = rows[col].replace(replacement_sokak)
+    rows[col] = rows[col].apply(text_edit)
     return rows
     
 def run_preprocess(df: pd.DataFrame):
