@@ -10,40 +10,6 @@ from replacements import replacement_sokak, replacement_cadde, replacement_apart
 from expressions import ifadeler, yer_yon_belirten
 
 
-def extract_integers_from_string(string):
-    return [int(item) for item in re.findall(r'\b\d+\b', string)]
-
-
-def dis(s1: str, s2: str) -> str:
-    '''
-    Does: 
-    '''
-    s1 = list(s1)
-    s2 = list(s2)
-    s1 = dict(Counter(s1))
-    s2 = dict(Counter(s2))
-
-    s1 = list(s1.keys())
-    s2 = list(s2.keys())
-
-    intersection = list(set(s1).intersection(set(s2)))
-    s1 = [i for i in s1 if i not in intersection]
-    s2 = [i for i in s2 if i not in intersection]
-
-    s1 = s1 + s2
-    s1 = "".join(s1)
-
-    cost = 0
-
-    for s in s1:
-        if s in ['.', ',', ';', ':', '/', '-', ' ']:
-            cost = cost + 0
-        else:
-            cost += 1
-
-    return cost
-
-
 def levenshteinDistance(str1, str2):
     m = len(str1)
     n = len(str2)
@@ -74,17 +40,17 @@ def getLower(input: str) -> str:
     #: Return
     return input
 
-replacement = {
+eplacements = {
         'sk': 'sokak',
         'sok': 'sokak',
-        'sokağı': 'sokak',
-        'apartmani': 'apartman',
-        'apartmanı': 'apartman',
-        'apt.': 'apartman',
+        'sokagi': 'sokak',
+        'blk': 'blok',
+        'ap': 'apartman',
         'apt': 'apartman',
-        'caddesi': 'cadde',
-        'cad.': 'cadde',
+        'apartmani': 'apartman',
+        'cd': 'cadde',
         'cad': 'cadde',
+        'caddesi': 'cadde',
     }
 
 def adres(row):
@@ -272,8 +238,7 @@ def il_ilce_mah_corrector(df):
                 il = correct_il[il_score_list.index(max(il_score_list))]
                 df.at[index, 'İl'] = il
 
-                ilce_list = df_correct[df_correct['IL']
-                                       == il]['ILCE'].unique().tolist()
+                ilce_list = df_correct[df_correct['IL'] == il]['ILCE'].unique().tolist()
                 if row['İlçe'] not in ilce_list:
                     ilce_score_list = []
                     for ilce in ilce_list:
@@ -285,8 +250,7 @@ def il_ilce_mah_corrector(df):
                             max(ilce_score_list))]
                         df.at[index, 'İlçe'] = ilce
 
-                        mahalle_list = df_correct[df_correct['IL'] ==
-                                                  il][df_correct['ILCE'] == ilce]['MAHALLE'].unique().tolist()
+                        mahalle_list = df_correct[df_correct['IL'] == il][df_correct['ILCE'] == ilce]['MAHALLE'].unique().tolist()
                         if row['Mahalle'] not in mahalle_list:
                             mahalle_score_list = []
                             for mahalle in mahalle_list:
@@ -310,7 +274,6 @@ def add_mah_str(row):
     row['Mahalle'] = row['Mahalle'] + ' Mahallesi'
     return row
 
-
 def replace_nan_with_0(row):
     '''
     Replace NaN with 0
@@ -318,7 +281,6 @@ def replace_nan_with_0(row):
     if np.isnan(row['oran']) == True:
         row['oran'] = 0
     return row
-
 
 def detect_non_adress(row):
     '''
@@ -360,7 +322,7 @@ def do_replacements(rows, col="text"):
     rows[col] = rows[col].replace(replacement_sokak)
     rows[col] = rows[col].apply(text_edit)
     return rows
-    
+
 def run_preprocess(df: pd.DataFrame):
     df = il_ilce_mah_corrector(df)
     df['Mahalle'] = df['Mahalle'].apply(
@@ -369,13 +331,13 @@ def run_preprocess(df: pd.DataFrame):
     df = df.fillna("")
     df["group"] = df["İl"] +"_" +df["İlçe"] +"_" +df["Mahalle"] +"_" +df["Bina Adı"] +"_" +df["Bulvar/Cadde/Sokak/Yol/Yanyol"] +"_" +df["Ad-Soyad"] +"_" +df["İç Kapı"]+"_" +df["Adres"]+"_" +df["Telefon"]+"_" +df["Dış Kapı/ Blok/Apartman No"]
     df = df.drop_duplicates(["group"])
-    df["Adres"] = df["Adres"].str.lower()
-    df['Adres'] = df['Adres'].str.replace('\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '',regex=True) # remove url
-    df['Adres'] = df['Adres'].str.replace('@[A-Za-z0-9_]+', '',regex=True) # remove tag
-    df['Adres'] = df['Adres'].str.replace('#[A-Za-z0-9_]+', '',regex=True) # remove hashtag
-    df['Adres'] = df['Adres'].str.replace('[^\w\s#@/:%.,_-]', '', flags=re.UNICODE) #emoji
-    df['Adres'] = df['Adres'].str.replace('\n', '')
-    df['Adres'] = df['Adres'].str.replace('\t', '')
+    #df["Adres"] = df["Adres"].str.lower()
+    #df['Adres'] = df['Adres'].str.replace('\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '',regex=True) # remove url
+    #df['Adres'] = df['Adres'].str.replace('@[A-Za-z0-9_]+', '',regex=True) # remove tag
+    #df['Adres'] = df['Adres'].str.replace('#[A-Za-z0-9_]+', '',regex=True) # remove hashtag
+    #df['Adres'] = df['Adres'].str.replace('[^\w\s#@/:%.,_-]', '', flags=re.UNICODE) #emoji
+    #df['Adres'] = df['Adres'].str.replace('\n', '')
+    #df['Adres'] = df['Adres'].str.replace('\t', '')
     
     # Rule based prep
     df['Mahalle'] = df['Mahalle'].apply(
@@ -397,3 +359,152 @@ def run_preprocess(df: pd.DataFrame):
     df = df.apply(lambda row: process_apart_no(row), axis=1)
 
     return df
+
+
+"""
+1. adres merge edilecek [OK]
+    - bina sokak vb columnlar dikkate alinmayacak merge'den sonra
+2. il, ilce, mahalle, merged_address string manipulation'lar yapilacak:
+    - turkce harf degistirmeler [OK]
+    - kucuk harfe alma [OK]
+    - regex replacementlar (url vb) [OK]
+    - ozel semboller [OK]
+    - space haric diger whitspace'ler [OK]
+3. merged adres manipulation'lar yapilacak:
+    - alakasiz ifade varsa silinecek
+    - yer yon ifadesi hic yoksa boslukla degisiyo
+    - sok mah vb
+4. mahalle manipulation'lar yapilacak:
+    - sonundaki "mahallesi", "mahalle", "mah" vb silinecek
+    - bos olanlar "undefined" olarak guncellenicek
+5. ilce manipulation'lar yapilacak:
+    - bos olanlar "undefined" olarak guncellenicek
+6. il manipulation'lar yapilacak:
+    - bos olanlar "undefined" olarak guncellenicek
+7. il/ilce/mahalle icisileri dokumanina gore normalize edilecek
+8. exact match'ler process edilecek:
+    - exact match olanlar arasinda, en dusuk index'li olan original secilecek
+    - exact match olanlar arasinda digerlerine original index eklenecek
+    - sonra bunlarin clustering'e girmemesi saglanacak
+"""
+
+"""
+Removes lowercase turkish letters from a string
+"""
+def replace_turkish_letters(input: str) -> str:
+    return input \
+        .replace("ğ", "g") \
+        .replace("ı", "i") \
+        .replace("ç", "c") \
+        .replace("ö", "o") \
+        .replace("ü", "u") \
+        .replace("ş", "s") \
+        .replace("â", "a") \
+        .replace("î", "i") \
+        .replace("û", "u")
+
+"""
+Removes a set of regex patterns from a string, to remove:
+- URLs
+- Tags
+- Hashtags
+- Substrings wrapped in ()
+- Substrings wrapped in !!<string>!!
+"""
+def replace_regex_patterns(input: str) -> str:
+    regexes = [
+        r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', # URLs
+        r'[^\w\s#@/:%.,_-]', # Emoji
+        r'@[A-Za-z0-9_]+', # Tags
+        r'#[A-Za-z0-9_]+', # Hashtags
+        r'(\([^)]+\)+)', # Substrings wrapped in ()
+        r'(\!+[^!]+\!+)' # Substrings wrapped in !!
+    ]
+    for regex in regexes:
+        input = re.sub(regex, '', input)
+    return input
+
+"""
+Removes tabs, newlines, and leading/trailing whitespace from a string
+"""
+def clean_whitespace(input: str) -> str:
+    return input.strip().replace('\n', ' ').replace('\t', ' ')
+
+"""
+Applies general purpose preprocessing to a string, including:
+- lowercasing
+- Turkish letter replacement
+- whitespace cleaning
+- regex pattern replacement
+"""
+def process_column_string(input: str) -> str:
+    lower = input.lower()
+    whitespace_cleaned = clean_whitespace(lower)
+    un_turkish = replace_turkish_letters(whitespace_cleaned)
+    regex_cleaned = replace_regex_patterns(un_turkish)
+    return regex_cleaned
+
+def replace_address_abbreviations(input: str) -> str:
+    replacement_dicts = [
+        replacement_site,
+        replacement_apartman,
+        replacement_cadde,
+        replacement_mahalle,
+        replacement_sokak
+    ]
+    for replacement_dict in replacement_dicts:
+        for frm, to in replacement_dict.items():
+            input = input.replace(frm, to)
+    return input
+
+def replace_help_call_strings(input: str) -> str:
+    for help_string in ifadeler:
+        input = input.replace(help_string, "").strip()
+    return input
+
+def is_non_address_string(input: str) -> bool:
+    for address_phrase in yer_yon_belirten:
+        # TODO: do this once instead of doing in the loop
+        if replace_turkish_letters(address_phrase) in input:
+            return True
+    return False
+    
+"""
+Applies address specific preprocessing to a string, including:
+- replace abbreviations such as sok mah cad etc.
+- remove known non-address phrases
+- remove strings with no known address phrases
+- TODO: merge oncesi il ilce adres stringinden silinecek
+"""
+def process_address_column_string(input: str) -> str:
+    abbreviations_replaced = replace_address_abbreviations(input)
+    help_calls_removed = replace_help_call_strings(abbreviations_replaced)
+    if is_non_address_string(help_calls_removed):
+        return ""
+    return help_calls_removed
+
+"""
+Processes street/door number and "block" phrases in an address string
+"""
+def process_building_number(input: str) -> str:
+    no_regex = r"\bno\b(\s+|:|\.) ?(\d+)"
+    nos_processed = re.sub(no_regex, r"no\2 ", input)
+    blok_regex = r"( )?blok\b(-|\.| )?"
+    blok_processed = re.sub(blok_regex, "blok ", nos_processed)
+    blok_pre_regex = r"\bblok (\w)"
+    blok_processed = re.sub(blok_pre_regex, r"\1blok ", blok_processed)
+    return blok_processed
+
+def process_columns(df: pd.DataFrame) -> pd.DataFrame:
+    address_columns = ["İl", "İlçe", "Mahalle", "merged_address"]
+    all_columns = address_columns + ["Ad-Soyad"]
+    df[all_columns] = df[all_columns].apply(process_column_string)
+    df["merged_address"] = df["merged_address"].apply(process_building_number)
+    df[address_columns] = df[address_columns].apply(process_address_column_string)
+    return df
+
+def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+    # 1. adres merge edilecek
+    df["merged_address"] = df['Bina Adı'] + " " + df['Dış Kapı/ Blok/Apartman No'] + " " + df["Bulvar/Cadde/Sokak/Yol/Yanyol"]
+    df.drop(columns=['Bina Adı', 'Dış Kapı/ Blok/Apartman No', 'Bulvar/Cadde/Sokak/Yol/Yanyol'], inplace=True)
+    df = process_columns(df)
