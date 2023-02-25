@@ -10,11 +10,14 @@ from preprocess_funcs import run_preprocess
 def load_data(data_path: str, preprocess_save_path: str = "data/df_preprocessed.pkl") -> pd.DataFrame:
     if data_path.endswith(".pkl"):
         df = pd.read_pickle(data_path)
+        print(f"Loaded processed data from {data_path}, with {df.shape[0]} rows and {df.shape[1]} columns.")
     elif data_path.endswith(".csv"):
         df = pd.read_csv(data_path)
         df = df.fillna("")
+        print(f"Loaded unprocessed data from {data_path}, with {df.shape[0]} rows and {df.shape[1]} columns.")
         df = run_preprocess(df)
-        pd.to_pickle(df,preprocess_save_path)
+        print(f"Processed the data, ended up with {df.shape[0]} rows and {df.shape[1]} columns.")
+        pd.to_pickle(df, preprocess_save_path)
     return df
 
 def merge_address_columns(
@@ -28,11 +31,11 @@ def merge_address_columns(
 def cluster_by_column(
         df: pd.DataFrame,
         key_column_name: str,
-        duplicate_max_distance_threshold: float = 0.1,
-        tfidf_ngram_range: tuple = (1, 1),
-        tfidf_min_df: int = 1,
-        tfidf_use_char_ngrams: bool = False,
-        df_mask = None,
+        duplicate_max_distance_threshold: float,
+        tfidf_ngram_range: tuple,
+        tfidf_min_df: int,
+        tfidf_use_char_ngrams: bool,
+        df_mask,
 ) -> pd.DataFrame:
     # index the rows that will be clustered
     df.loc[df_mask, "clustering_index"] = list(range(df.loc[df_mask].shape[0]))
@@ -84,11 +87,11 @@ def cluster_by_column(
 
 def cluster_data(
         df: pd.DataFrame,
-        name_duplicate_max_distance_threshold: float = 0.1,
-        address_duplicate_max_distance_threshold: float = 0.1,
-        tfidf_ngram_range: tuple = (1, 1),
-        tfidf_min_df: int = 1,
-        tfidf_use_char_ngrams: bool = False,
+        name_duplicate_max_distance_threshold: float,
+        address_duplicate_max_distance_threshold: float,
+        tfidf_ngram_range: tuple,
+        tfidf_min_df: int,
+        tfidf_use_char_ngrams: bool,
 ) -> pd.DataFrame:
     df.loc[:, "clustering_index"] = -1
     def cluster_group(group_df):
@@ -152,6 +155,7 @@ def main(
         address_duplicate_max_distance_threshold=address_duplicate_max_distance_threshold, 
         tfidf_ngram_range=(tfidf_ngram_min, tfidf_ngram_max),
         tfidf_use_char_ngrams=tfidf_use_char_ngrams,
+        tfidf_min_df=1,
     )
     if save_clustered_csv:
         df_main.to_csv(output_data_path, index=False)
